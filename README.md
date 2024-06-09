@@ -15,13 +15,13 @@ git clone "https://github.com/RahmonexTheOne/Voltaire-Solver-Extension.git"
 
 2. Open Google Chrome and navigate to: `chrome://extensions/`.
 
-3. Enable developer mode.
+3. Enable developer mode.<br>
 ![Developer Mode](screenshots/developer-mode.png)
 
-5. Click on "Load unpacked" and select the directory of the cloned GitHub repository.
+5. Click on "Load unpacked" and select the directory of the cloned GitHub repository.<br>
 ![Load Unpacked](screenshots/load-unpacked.png)
 
-6. You should now see the Voltaire Solver extension listed among your Chrome extensions.
+6. You should now see the Voltaire Solver extension listed among your Chrome extensions.<br>
 ![Extension](screenshots/extension.png)
 
 ## What does the script do:
