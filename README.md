@@ -1,4 +1,4 @@
-![Voltaire Solver Icon](path/to/your/icon.png)
+![Voltaire Solver Icon](icons/icon-128.png)
 
 # Voltaire-Solver-Extension
 
