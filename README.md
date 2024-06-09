@@ -1,8 +1,21 @@
+![Voltaire Solver Icon](path/to/your/icon.png)
+
 # Voltaire-Solver-Extension
 
 **Voltaire Solver by Rahmonex** is a robust web extension tailored to enrich your French language journey on GitHub. Inspired by the legacy of the esteemed French writer and philosopher, Voltaire, this tool empowers users to refine their written expression with unparalleled accuracy and clarity.
 
-## What does the script do:
+## How to Use:
+
+1. First, clone the repository:
+git clone "https://github.com/RahmonexTheOne/Voltaire-Solver-Extension.git"
+
+2. Open Google Chrome and navigate to: `chrome://extensions/`.
+
+3. Enable developer mode.
+
+4. Click on "Load unpacked" and select the directory of the cloned GitHub repository.
+
+5. You should now see the Voltaire Solver extension listed among your Chrome extensions.
 
 ### Content Script (`content-script.js`):
 
