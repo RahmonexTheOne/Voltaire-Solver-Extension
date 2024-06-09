@@ -1,23 +1,28 @@
 # Voltaire-Solver-Extension
-Voltaire Solver by Rahmonex" is a powerful web extension designed to enhance your French language experience on the web. Named after the famed French writer and philosopher, Voltaire, this tool empowers users to elevate their writing to new heights of correctness and clarity.
 
-# What does the script do :
-Content Script (content-script.js):
+**Voltaire Solver by Rahmonex** is a robust web extension tailored to enrich your French language journey on GitHub. Inspired by the legacy of the esteemed French writer and philosopher, Voltaire, this tool empowers users to refine their written expression with unparalleled accuracy and clarity.
 
--This script is injected into web pages to interact with their content.
--It defines a function debounce that delays the execution of a function until after a specified amount of time has elapsed since the last invocation. This helps prevent overwhelming the LanguageTool API with too many requests.
--There's a function displayCorrection that takes a sentence element, the original text, and an array of corrections. It finds the positions of errors in the text and visually indicates them by inserting "(faute ici)" (error here) at the appropriate locations.
--Another function, checkAndDisplayCorrections, sends the text content of a sentence element to the LanguageTool API for error checking. If errors are found, it calls displayCorrection to visually mark them.
--The script also sets up a MutationObserver to watch for changes in the DOM, particularly for the addition of new sentence elements. When new sentences are added, it triggers the error checking process.
+## What does the script do:
 
-Manifest (manifest.json):
+### Content Script (`content-script.js`):
 
--It defines the metadata and permissions for the extension.
--The extension is given permission to access active tabs and to make requests to the LanguageTool API.
--It specifies a background script (background.js) to handle browser action events.
--Content scripts are specified to run on all URLs, and they include content-script.js.
--Icons for the extension are provided in various sizes.
+- This script seamlessly integrates into web pages, facilitating interactions with their content.
+- It incorporates a `debounce` function, strategically delaying the execution of actions to prevent overwhelming the LanguageTool API with excessive requests.
+- The `displayCorrection` function visually annotates errors within text by intelligently inserting "(faute ici)" (error here) at the precise locations.
+- Utilizing the `checkAndDisplayCorrections` function, text content undergoes meticulous scrutiny via the LanguageTool API, with detected errors promptly marked for review.
+- Employing a MutationObserver, the script dynamically monitors DOM changes, particularly the addition of new sentence elements, to initiate error-checking procedures.
 
-Background Script (background.js):
+### Manifest (`manifest.json`):
 
--It listens for clicks on the extension's icon and executes the content script (content-script.js) in the active tab when clicked.
+- Metadata and permissions are meticulously defined to ensure seamless functionality of the extension.
+- Permissions are granted for accessing active tabs and communicating with the LanguageTool API.
+- A background script (`background.js`) is designated to handle browser action events.
+- Content scripts are configured to operate across all URLs, encompassing `content-script.js`.
+- Diverse icon sizes are provided to enhance visual representation.
+
+### Background Script (`background.js`):
+
+- This script attentively listens for user interactions, specifically clicks on the extension's icon.
+- Upon detection of user action, it orchestrates the execution of the content script (`content-script.js`) within the active tab, facilitating error detection and correction.
+
+Embark on your journey of linguistic refinement with **Voltaire Solver by Rahmonex** — your indispensable companion for elevating French language proficiency on GitHub.
