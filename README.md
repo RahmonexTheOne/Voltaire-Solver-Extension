@@ -7,7 +7,9 @@
 ## How to Use:
 
 1. First, clone the repository:
+```bash
 git clone "https://github.com/RahmonexTheOne/Voltaire-Solver-Extension.git"
+```
 
 2. Open Google Chrome and navigate to: `chrome://extensions/`.
 
@@ -16,6 +18,8 @@ git clone "https://github.com/RahmonexTheOne/Voltaire-Solver-Extension.git"
 4. Click on "Load unpacked" and select the directory of the cloned GitHub repository.
 
 5. You should now see the Voltaire Solver extension listed among your Chrome extensions.
+
+## What does the script do:
 
 ### Content Script (`content-script.js`):
 
