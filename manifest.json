@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Voltaire Solver by Rahmonex",
+  "version": "1.0",
+  "description": "Projet Voltaire error solver",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://api.languagetool.org/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  }
+}
