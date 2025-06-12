@@ -36,7 +36,9 @@ function displayCorrection(sentenceElement, text, corrections) {
 
           const dotSpan = document.createElement('span'); 
           dotSpan.textContent = ',';
-          dotSpan.style.color = '#fcfcfc'; 
+          dotSpan.style.color = '#fefefe'; // Even whiter
+          dotSpan.style.fontSize = '0.8em'; // Smaller font size
+          dotSpan.style.opacity = '0.2';
           range.insertNode(dotSpan); 
 
           done = true; 
@@ -56,21 +58,50 @@ function displayCorrection(sentenceElement, text, corrections) {
 }
 
 function checkAndDisplayCorrections(sentenceElement) {
-  const text = sentenceElement.innerText; 
-  fetch(`https://api.languagetool.org/v2/check?language=fr&text=${encodeURIComponent(text)}`, {
-    method: 'POST' 
+  const text = sentenceElement.innerText.trim();
+  
+  // Skip very short texts
+  if (text.length < 3) return;
+  
+  // Try LanguageTool with better parameters
+  const languageToolUrl = `https://api.languagetool.org/v2/check`;
+  const params = new URLSearchParams({
+    language: 'fr',
+    text: text,
+    enabledOnly: 'false',
+    level: 'picky' // More thorough checking
+  });
+
+  fetch(languageToolUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params
   })
   .then(response => response.json())
   .then(data => {
-    console.log('API Response:', data); 
+    console.log('API Response:', data);
+    console.log('Text being checked:', text);
+    
     if (data.matches && Array.isArray(data.matches) && data.matches.length > 0) {
-      displayCorrection(sentenceElement, text, data.matches); 
+      // Filter out very minor suggestions to reduce false positives
+      const significantMatches = data.matches.filter(match => 
+        match.rule && 
+        (match.rule.category.id === 'GRAMMAR' || 
+         match.rule.category.id === 'TYPOS' ||
+         match.rule.category.id === 'CONFUSED_WORDS')
+      );
+      
+      if (significantMatches.length > 0) {
+        displayCorrection(sentenceElement, text, significantMatches);
+      }
     } else {
-      console.log('No errors found or API response issue'); 
+      console.log('No errors found');
     }
   })
   .catch(error => {
-    console.error('Error:', error); 
+    console.error('Error:', error);
   });
 }
 
