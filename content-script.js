@@ -35,8 +35,8 @@ function displayCorrection(sentenceElement, text, corrections) {
           range.setEnd(node, positionInNode);
 
           const dotSpan = document.createElement('span'); 
-          dotSpan.textContent = '(faute ici)';
-          dotSpan.style.color = 'black'; 
+          dotSpan.textContent = ',';
+          dotSpan.style.color = '#fcfcfc'; 
           range.insertNode(dotSpan); 
 
           done = true; 
