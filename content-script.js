@@ -119,7 +119,19 @@ async function checkWithLanguageTool(text) {
 
 function findCommonFrenchErrors(text) {
   const patterns = [
-    
+    // Conditionnel vs Futur - 1ère personne du singulier
+    { regex: /\bje\s+souhaiterai\b/gi, type: 'conditionnel vs futur (souhaiterais)' },
+    { regex: /\bje\s+aimerai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (aimerais)' },
+    { regex: /\bje\s+voudrai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (voudrais)' },
+    { regex: /\bje\s+pourrai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (pourrais)' },
+    { regex: /\bje\s+saurai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (saurais)' },
+    { regex: /\bje\s+ferai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (ferais)' },
+    { regex: /\bje\s+dirai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (dirais)' },
+
+    // Expressions de politesse qui nécessitent le conditionnel
+    { regex: /\bje\s+(?:souhaiterai|aimerai|voudrai)\s+que\b/gi, type: 'politesse - conditionnel requis' },
+    { regex: /\bje\s+(?:souhaiterai|aimerai|voudrai)\s+bien\b/gi, type: 'politesse - conditionnel requis' },
+
     // Négations avec élision manquante
     { regex: /\bon\s+y\s+(?:va|allait|ira|irait|est|était|sera|serait|a|avait|aura|aurait)\b/gi, type: 'négation manquante (on n\'y)' },
     { regex: /\bon\s+en\s+(?:a|avait|aura|aurait|est|était|sera|serait|va|allait|ira|irait)\b/gi, type: 'négation manquante (on n\'en)' },
