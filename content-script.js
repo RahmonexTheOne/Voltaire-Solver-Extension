@@ -119,6 +119,13 @@ async function checkWithLanguageTool(text) {
 
 function findCommonFrenchErrors(text) {
   const patterns = [
+    
+    // Négations avec élision manquante
+    { regex: /\bon\s+y\s+(?:va|allait|ira|irait|est|était|sera|serait|a|avait|aura|aurait)\b/gi, type: 'négation manquante (on n\'y)' },
+    { regex: /\bon\s+en\s+(?:a|avait|aura|aurait|est|était|sera|serait|va|allait|ira|irait)\b/gi, type: 'négation manquante (on n\'en)' },
+    { regex: /\bon\s+(?:a|avait|aura|aurait)\s+(?:pas|plus|jamais|rien)\b/gi, type: 'négation incomplète (il manque ne/n\')' },
+    // Élision manquante avec négation
+    { regex: /\bon\s+y\s+(?:va|allait|ira|irait|est|était|sera|serait)\b/gi, type: 'élision négation manquante (on n\'y)' },
 
     // "fait" + infinitive rule - should be invariable
     { regex: /\b(?:ont|avons|avez|as|a)\s+faits\s+(?:dire|faire|voir|savoir|comprendre|entendre|laisser|venir|partir|aller|sortir|entrer|monter|descendre)\b/gi, type: 'fait + infinitif (doit être invariable)' },
