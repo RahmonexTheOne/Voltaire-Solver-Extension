@@ -36,9 +36,8 @@ function displayCorrection(sentenceElement, text, corrections) {
 
           const dotSpan = document.createElement('span'); 
           dotSpan.textContent = ',';
-          dotSpan.style.color = '#fefefe';
-          dotSpan.style.fontSize = '0.2em';
-          dotSpan.style.opacity = '0.2';
+          dotSpan.style.color = '#f5f5f5';
+          dotSpan.style.opacity = '1';
           range.insertNode(dotSpan); 
 
           done = true; 
@@ -57,145 +56,48 @@ function displayCorrection(sentenceElement, text, corrections) {
   });
 }
 
-// --------------------------------------
-// Enhanced French Grammar Checking
-// --------------------------------------
-async function checkWithLanguageTool(text) {
-  let allMatches = [];
-  
-  try {
-    // First call: General French checking with all rules enabled
-    const generalResponse = await fetch(`https://api.languagetool.org/v2/check`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        language: 'fr',
-        text: text,
-        level: 'picky',
-        // Enable ALL French rule categories
-        enabledCategories: 'TYPOS,GRAMMAR,CONFUSED_WORDS,STYLE,PUNCTUATION,CASING,REDUNDANCY,SEMANTICS,MISC'
-      })
-    });
-    
-    const generalData = await generalResponse.json();
-    if (generalData.matches) allMatches.push(...generalData.matches);
-
-    // Second call: Specific French rules that are sometimes disabled by default
-    const specificResponse = await fetch(`https://api.languagetool.org/v2/check`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        language: 'fr',
-        text: text,
-        enabledRules: [
-          'FRENCH_WHITESPACE',
-          'AGREEMENT_PAST_PARTICIPLE', 
-          'CONJUGAISON_VERBE',
-          'ACCORD_VERBE',
-          'ACCORD_ADJECTIF',
-          'ACCORD_NOMBRE',
-          'FRANCAIS_ORTHOGRAPHE',
-          'CONFUSION_WORD',
-          'ELISION',
-          'HOMOPHONE_CONFUSION',
-          'APOSTROPHE_TYPOGRAPHIQUE',
-          'ACCORD_PARTICIPE_PASSE',
-          'SUBJONCTIF_PRESENT',
-          'BARBARISM_FRENCH',
-          'FRENCH_WORD_COHERENCY'
-        ].join(',')
-      })
-    });
-    
-    const specificData = await specificResponse.json();
-    if (specificData.matches) allMatches.push(...specificData.matches);
-
-  } catch (error) {
-    console.error('LanguageTool error:', error);
-  }
-  
-  return allMatches;
-}
-
+// Ajouter les patterns personnalisés aux résultats de LanguageTool
 function findCommonFrenchErrors(text) {
   const patterns = [
-    // Conditionnel vs Futur - 1ère personne du singulier
-    { regex: /\bje\s+souhaiterai\b/gi, type: 'conditionnel vs futur (souhaiterais)' },
-    { regex: /\bje\s+aimerai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (aimerais)' },
-    { regex: /\bje\s+voudrai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (voudrais)' },
-    { regex: /\bje\s+pourrai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (pourrais)' },
-    { regex: /\bje\s+saurai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (saurais)' },
-    { regex: /\bje\s+ferai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (ferais)' },
-    { regex: /\bje\s+dirai\b(?!\s+(?:demain|bientôt|plus tard|dans))/gi, type: 'conditionnel vs futur (dirais)' },
-
-    // Expressions de politesse qui nécessitent le conditionnel
-    { regex: /\bje\s+(?:souhaiterai|aimerai|voudrai)\s+que\b/gi, type: 'politesse - conditionnel requis' },
-    { regex: /\bje\s+(?:souhaiterai|aimerai|voudrai)\s+bien\b/gi, type: 'politesse - conditionnel requis' },
-
+    // "quoique" vs "quoi que"
+    { regex: /\bquoique\s+ce\s+soit\b/gi, type: 'quoique ce soit → quoi que ce soit' },
+    { regex: /\bquoique\s+(?:vous|tu|il|elle|on|nous|ils|elles|j'|l')\s+\w+(?:e|es|ent|ions|iez)\b/gi, type: 'quoique → quoi que (en deux mots)' },
+    
+    // "voir" vs "voire"
+    { regex: /,\s+voir\s+(?:\w+\s+)?(?:soir|matin|demain|hier|aujourd'hui|samedi|dimanche|lundi|mardi|mercredi|jeudi|vendredi)\b/gi, type: 'voir → voire (et même)' },
+    { regex: /\bvoir\s+(?:même|plus|davantage|mieux|pire|pis)\b/gi, type: 'voir → voire (et même)' },
+    
+    // Traits d'union avec inversion
+    { regex: /\b\w+[aeiou]\s+t[''](?:il|elle|on)\b/gi, type: 'trait d\'union requis (verbe-t-pronom)' },
+    { regex: /\b(?:comment|pourquoi|quand|où|que)\s+\w+\s+(?:il|elle|on|ils|elles|vous|tu)\b/gi, type: 'trait d\'union question inversion' },
+    
+    // Futur vs Conditionnel - verbes irréguliers
+    { regex: /\bje\s+(?:crois|pense|suppose|imagine)\s+que\s+j'(?:aurai|serai|irai|ferai|dirai|saurai|pourrai|voudrai|devrai)\b/gi, type: 'conditionnel requis après opinion' },
+    { regex: /\bj'aurai\s+(?:mieux|plutôt|peut-être|probablement|dû|pu|voulu|aimé)\b/gi, type: 'conditionnel requis (j\'aurais)' },
+    
+    // Conditionnel vs Futur - règles générales
+    { regex: /\bje\s+\w+ai\s+(?:que|bien|volontiers)\b/gi, type: 'conditionnel requis - politesse (ajouter S)' },
+    { regex: /\b(?:demain|bientôt|plus\s+tard|la\s+prochaine\s+fois|ce\s+sera),?\s+je\s+\w+ais\b/gi, type: 'futur requis - certitude (enlever S)' },
+    
     // Négations avec élision manquante
     { regex: /\bon\s+y\s+(?:va|allait|ira|irait|est|était|sera|serait|a|avait|aura|aurait)\b/gi, type: 'négation manquante (on n\'y)' },
     { regex: /\bon\s+en\s+(?:a|avait|aura|aurait|est|était|sera|serait|va|allait|ira|irait)\b/gi, type: 'négation manquante (on n\'en)' },
-    { regex: /\bon\s+(?:a|avait|aura|aurait)\s+(?:pas|plus|jamais|rien)\b/gi, type: 'négation incomplète (il manque ne/n\')' },
-    // Élision manquante avec négation
-    { regex: /\bon\s+y\s+(?:va|allait|ira|irait|est|était|sera|serait)\b/gi, type: 'élision négation manquante (on n\'y)' },
-
-    // "fait" + infinitive rule - should be invariable
+    
+    // "fait" + infinitive - erreurs
     { regex: /\b(?:ont|avons|avez|as|a)\s+faits\s+(?:dire|faire|voir|savoir|comprendre|entendre|laisser|venir|partir|aller|sortir|entrer|monter|descendre)\b/gi, type: 'fait + infinitif (doit être invariable)' },
     { regex: /\bse\s+(?:sont|sommes|êtes)\s+faits\s+(?:dire|faire|voir|savoir|comprendre|entendre|laisser|venir|partir|aller|sortir|entrer|monter|descendre)\b/gi, type: 'se fait + infinitif (doit être invariable)' },
-
-    // Past participle agreement with avoir when object precedes
-    { regex: /\b(?:que|qu[''])\s+\w+\s+(?:ont|avons|avez|as|a)\s+reçu(?![se])\b/gi, type: 'accord participe passé avec avoir (COD avant)' },
-    { regex: /\b(?:la|les)\s+\w+\s+(?:que|qu[''])\s+\w+\s+(?:ont|avons|avez|as|a)\s+reçu(?![se])\b/gi, type: 'accord participe passé avec avoir (COD avant)' },
-
-    // Adjective agreement errors
-    { regex: /\b(?:une|la)\s+\w*\s+inclue\b/gi, type: 'accord adjectif féminin (incluse)' },
-    { regex: /\b(?:une|la)\s+\w*\s+(?:nu|nue)\b/gi, type: 'accord adjectif féminin' },
-
-    // More specific past participle patterns
+    
+    // Accords participes passés
     { regex: /\b(?:la|cette|une)\s+\w+\s+(?:que|qu[''])\s+\w+\s+(?:ont|avons|avez|as|a)\s+(?:reçu|vu|pris|mis|fait|dit|écrit|lu|su|pu|voulu|dû)(?![se])\b/gi, type: 'accord participe passé (COD féminin avant)' },
-
-    // Past participle agreements (but exclude "fait" + infinitive cases)
-    { regex: /j'ai\s+reçu(?![s])(?!\s+\w+er\b)/gi, type: 'participe passé' },
-    { regex: /j'ai\s+vu(?![s])(?!\s+\w+er\b)/gi, type: 'participe passé' },
-    { regex: /j'ai\s+pris(?![e])(?!\s+\w+er\b)/gi, type: 'participe passé' },
-    { regex: /j'ai\s+mis(?![e])(?!\s+\w+er\b)/gi, type: 'participe passé' },
     
-    // IMPORTANT: "fait" + infinitive errors (should NOT be flagged as errors)
-    // These are CORRECT and should be excluded from error detection
+    // Adjectifs
+    { regex: /\b(?:une|la)\s+\w*\s+inclue\b/gi, type: 'accord adjectif féminin (incluse)' },
     
-    // Incorrect "fait" agreements (these ARE errors)
-    { regex: /\b(?:a|ont|avons|avez|as)\s+faits?\s+(?!(?:entrer|sortir|venir|partir|aller|monter|descendre|tomber|rester|devenir|naître|mourir|passer|retourner|arriver)\b)/gi, type: 'fait + infinitif incorrect' },
-    
-    // Common homophones
-    { regex: /\bsa\s+(?=maison|voiture|famille)/gi, type: 'homophone' }, // should be "sa"
-    { regex: /\bça\s+(?=va|marche|fonctionne)/gi, type: 'homophone' }, // should be "ça"
-    { regex: /\bou\s+(?=bien|alors)/gi, type: 'homophone' }, // might be "où"
-    { regex: /\bet\s+(?=alors|puis)/gi, type: 'homophone' }, // might be "est"
-    
-    // Verb conjugations
-    { regex: /\bje\s+(?:vais|va)\b/gi, type: 'conjugaison' }, // should be "je vais"
-    { regex: /\btu\s+(?:va|vais)\b/gi, type: 'conjugaison' }, // should be "tu vas"
-    { regex: /\bil\s+(?:vais|vas)\b/gi, type: 'conjugaison' }, // should be "il va"
-    
-    // Adjective agreements
-    { regex: /\bune?\s+\w*(?:eau|elle|ette)\s+(?:grand|petit|beau|nouveau)(?![se])/gi, type: 'accord adjectif' },
-    
-    // Plural agreements
-    { regex: /\bdes\s+\w+(?<!s|x|z)\b/gi, type: 'accord pluriel' },
-    
-    // Elision errors
-    { regex: /\bde\s+(?=[aeiouhy])/gi, type: 'élision' }, // should be "d'"
-    { regex: /\ble\s+(?=[aeiouhy])/gi, type: 'élision' }, // should be "l'"
-    { regex: /\bce\s+(?=[aeiouhy])/gi, type: 'élision' }, // should be "c'"
-    
-    // Subjunctive mood
-    { regex: /\bil\s+faut\s+que\s+\w+\s+(?:vais|vas|va|vont|allez)/gi, type: 'subjonctif' },
-    
-    // Common spelling errors
-    { regex: /\bparmis\b/gi, type: 'orthographe' }, // should be "parmi"
-    { regex: /\bmalgres\b/gi, type: 'orthographe' }, // should be "malgré"
-    { regex: /\bbiensur\b/gi, type: 'orthographe' }, // should be "bien sûr"
-    { regex: /\bpeutetre\b/gi, type: 'orthographe' }, // should be "peut-être"
+    // Orthographe courante
+    { regex: /\bparmis\b/gi, type: 'orthographe (parmi)' },
+    { regex: /\bmalgres\b/gi, type: 'orthographe (malgré)' },
+    { regex: /\bbiensur\b/gi, type: 'orthographe (bien sûr)' },
+    { regex: /\bpeutetre\b/gi, type: 'orthographe (peut-être)' }
   ];
   
   const matches = [];
@@ -207,7 +109,7 @@ function findCommonFrenchErrors(text) {
         offset: match.index,
         length: match[0].length,
         rule: { category: { id: 'CUSTOM_PATTERN' } },
-        message: `Erreur possible: ${pattern.type}`
+        message: `Erreur: ${pattern.type}`
       });
     }
   });
@@ -215,74 +117,39 @@ function findCommonFrenchErrors(text) {
   return matches;
 }
 
-// Filter out correct "fait + infinitive" constructions
-function filterCorrectFaitInfinitive(matches, text) {
-  return matches.filter(match => {
-    const matchText = text.substring(match.offset, match.offset + match.length);
-    
-    // Check if this is a "fait + infinitive" construction (which is CORRECT)
-    const faitInfinitivePattern = /\b(?:a|ont|avons|avez|as|est|sont|suis|es|sommes|êtes)\s+fait\s+\w+er\b/gi;
-    const seFaitPattern = /\bs['']?est\s+fait\s+\w+er\b/gi;
-    const seSontFaitPattern = /\bse\s+sont\s+fait\s+\w+er\b/gi;
-    
-    // If the match overlaps with a correct "fait + infinitive", exclude it
-    const isCorrectFait = faitInfinitivePattern.test(text.substring(match.offset - 20, match.offset + match.length + 20)) ||
-                         seFaitPattern.test(text.substring(match.offset - 20, match.offset + match.length + 20)) ||
-                         seSontFaitPattern.test(text.substring(match.offset - 20, match.offset + match.length + 20));
-    
-    return !isCorrectFait;
-  });
-}
-function deduplicateMatches(matches) {
-  const uniqueMatches = [];
-  const processedRanges = [];
+function checkAndDisplayCorrections(sentenceElement) {
+  const text = sentenceElement.innerText; 
   
-  matches.sort((a, b) => a.offset - b.offset);
-  
-  for (const match of matches) {
-    const start = match.offset;
-    const end = match.offset + match.length;
+  // 1. Appel LanguageTool (ton code original)
+  fetch(`https://api.languagetool.org/v2/check?language=fr&text=${encodeURIComponent(text)}`, {
+    method: 'POST' 
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('API Response:', data);
     
-    // Check if this match overlaps with any processed range
-    const overlaps = processedRanges.some(range => 
-      (start >= range.start && start < range.end) ||
-      (end > range.start && end <= range.end) ||
-      (start <= range.start && end >= range.end)
-    );
+    let allMatches = [];
     
-    if (!overlaps) {
-      uniqueMatches.push(match);
-      processedRanges.push({ start, end });
+    // 2. Ajouter les matches de LanguageTool
+    if (data.matches && Array.isArray(data.matches)) {
+      allMatches.push(...data.matches);
     }
-  }
-  
-  return uniqueMatches;
-}
-
-async function checkAndDisplayCorrections(sentenceElement) {
-  const text = sentenceElement.innerText.trim();
-  if (text.length < 3) return;
-  
-  console.log('Checking text:', text);
-  
-  // Combine API results with pattern matching
-  const apiMatches = await checkWithLanguageTool(text);
-  const patternMatches = findCommonFrenchErrors(text);
-  
-  console.log('API matches:', apiMatches.length);
-  console.log('Pattern matches:', patternMatches.length);
-  
-  const allMatches = [...apiMatches, ...patternMatches];
-  
-  // Filter out correct "fait + infinitive" constructions
-  const filteredMatches = filterCorrectFaitInfinitive(allMatches, text);
-  const uniqueMatches = deduplicateMatches(filteredMatches);
-  
-  console.log('Total unique matches after filtering:', uniqueMatches.length);
-  
-  if (uniqueMatches.length > 0) {
-    displayCorrection(sentenceElement, text, uniqueMatches);
-  }
+    
+    // 3. Ajouter tes patterns personnalisés
+    const customMatches = findCommonFrenchErrors(text);
+    allMatches.push(...customMatches);
+    
+    console.log('Total matches:', allMatches.length);
+    
+    if (allMatches.length > 0) {
+      displayCorrection(sentenceElement, text, allMatches); 
+    } else {
+      console.log('No errors found'); 
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error); 
+  });
 }
 
 const debouncedCheckAndDisplayCorrections = debounce(checkAndDisplayCorrections, 500);
